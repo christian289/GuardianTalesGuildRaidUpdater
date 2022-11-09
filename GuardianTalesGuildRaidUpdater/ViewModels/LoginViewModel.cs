@@ -1,4 +1,5 @@
 ﻿using GuardianTalesGuildRaidUpdater.Models;
+using GuardianTalesGuildRaidUpdater.Models.Messages;
 using GuardianTalesGuildRaidUpdater.Options;
 using GuardianTalesGuildRaidUpdater.Services;
 
@@ -26,7 +27,6 @@ namespace GuardianTalesGuildRaidUpdater.ViewModels
             this.googleOpt = googleOpt.CurrentValue;
             this.endpointOpt = endpointOpt.CurrentValue;
             this.authService = authService;
-
             this.ImageContainer = imageContainer;
 
             CurrentImageStream = ImageContainer.Images[imageContainer.CurrentIdx].ContentInfo.Stream;
@@ -50,9 +50,25 @@ namespace GuardianTalesGuildRaidUpdater.ViewModels
         }
 
         [RelayCommand]
-        private async Task GoogleOAuthLoginCommandCore()
+        private async Task GoogleOAuthLogin()
         {
-            await authService.StartGoogleOAuthAsync();
+            if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.AccessToken) &&
+                Properties.Settings.Default.LastSaveTime + new TimeSpan(0, 0, Properties.Settings.Default.ExpiresIn) <= DateTime.Now) // AccessToken 만료
+            {
+                bool result = await authService.RefreshGoogleOAuthAsnyc();
+
+                WeakReferenceMessenger.Default.Send(new DialogResultMessage(result));
+            }
+            else if (string.IsNullOrWhiteSpace(Properties.Settings.Default.AccessToken))
+            {
+                bool result = await authService.StartGoogleOAuthAsync();
+
+                WeakReferenceMessenger.Default.Send(new DialogResultMessage(result));
+            }
+            else // 유효한 엑세스 토큰이 존재함.
+            {
+                WeakReferenceMessenger.Default.Send(new DialogResultMessage(true));
+            }
         }
     }
 }

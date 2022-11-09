@@ -26,7 +26,7 @@ namespace GuardianTalesGuildRaidUpdater.Services
             this.authInfo = authInfo;
         }
 
-        public async Task StartGoogleOAuthAsync()
+        public async Task<bool> StartGoogleOAuthAsync()
         {
             string state = RandomDataBase64url(32);
             string code_verifier = RandomDataBase64url(32);
@@ -107,14 +107,14 @@ namespace GuardianTalesGuildRaidUpdater.Services
             {
                 Console.WriteLine($"OAuth authorization error: {context.Request.QueryString.Get("error")}.");
 
-                return;
+                return false;
             }
 
             if (context.Request.QueryString.Get("code") is null || context.Request.QueryString.Get("state") is null)
             {
                 Console.WriteLine($"Malformed authorization response. {context.Request.QueryString}");
 
-                return;
+                return false;
             }
             #endregion
 
@@ -125,13 +125,13 @@ namespace GuardianTalesGuildRaidUpdater.Services
             {
                 Console.WriteLine($"Received request with invalid state ({incoming_state})");
                 
-                return;
+                return false;
             }
 
             Console.WriteLine($"Authorization code: {code}");
 
-            string accessToken = await GetAccessTokenAsync(httpClient, code, redirectUriStr, authOpt.ClientId, code_verifier, authOpt.ClientSecret, scope);
-            authInfo.AccessToken = accessToken;
+            await GetAccessTokenAsync(httpClient, code, redirectUriStr, authOpt.ClientId, code_verifier, authOpt.ClientSecret, scope);
+
             //string userInfo = await GetUserInfo(httpClient, accessToken);
 
             //Console.WriteLine(userInfo);
@@ -139,6 +139,22 @@ namespace GuardianTalesGuildRaidUpdater.Services
             //string fileList = await GetGoogleDriveFileList(httpClient, accessToken);
 
             //Console.WriteLine(fileList);
+
+            return true;
+        }
+
+        public async Task<bool> RefreshGoogleOAuthAsnyc()
+        {
+            try
+            {
+                bool result = await GetAccessTokenWithRefreshTokenAsync(httpClient, authOpt.ClientId, authOpt.ClientSecret, authInfo.RefreshToken);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         private string RandomDataBase64url(uint length)
@@ -181,7 +197,7 @@ namespace GuardianTalesGuildRaidUpdater.Services
             return port;
         }
 
-        private async Task<string> GetAccessTokenAsync(HttpClient httpClient, string code, string uri, string clientId, string code_verifier, string clientSecret, string scope = "")
+        private async Task GetAccessTokenAsync(HttpClient httpClient, string code, string uri, string clientId, string code_verifier, string clientSecret, string scope = "")
         {
             HttpRequestMessage httpRequest_GetAccessToken = new(HttpMethod.Post, new Uri(endpointOpt.Token));
             string requestContentBody = $"code={code}&redirect_uri={Uri.EscapeDataString(uri)}&client_id={clientId}&code_verifier={code_verifier}&client_secret={clientSecret}&scope={scope}&grant_type=authorization_code";
@@ -192,18 +208,21 @@ namespace GuardianTalesGuildRaidUpdater.Services
             httpRequest_GetAccessToken.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Xml));
             HttpResponseMessage response_GetAccessToken = await httpClient.SendAsync(httpRequest_GetAccessToken);
 
-            if (!response_GetAccessToken.IsSuccessStatusCode) return string.Empty;
+            if (!response_GetAccessToken.IsSuccessStatusCode) return;
 
             string res_string = await response_GetAccessToken.Content.ReadAsStringAsync(); //ReadFromJsonAsync<Dictionary<string, string>> 으로 바로하면 Exception 발생한다...왜?
-            Dictionary<string, string> res_content = JsonConvert.DeserializeObject<Dictionary<string, string>>(res_string)!;
+            ResGoogleOAuthToken res_content = JsonConvert.DeserializeObject<ResGoogleOAuthToken>(res_string)!;
 
-            if (!res_content.TryGetValue("access_token", out string accessToken)) return string.Empty;
-
-            return accessToken;
+            authInfo.RefreshToken = res_content.RefreshToken;
+            authInfo.AccessToken = res_content.AccessToken;
+            authInfo.ExpiresIn = res_content.ExpiresIn;
+            authInfo.Scope = res_content.Scope;
+            authInfo.TokenType = res_content.TokenType;
+            authInfo.EndUpdate();
         }
 
         // 응답 받고나면 AuthInfo에 업데이트 할 것
-        private async Task<ResGoogleOAuthTokenWithRefreshToken?> GetAccessTokenWithRefreshTokenAsync(HttpClient httpClient, string clientId, string clientSecret, string refreshToken)
+        private async Task<bool> GetAccessTokenWithRefreshTokenAsync(HttpClient httpClient, string clientId, string clientSecret, string refreshToken)
         {
             HttpRequestMessage httpRequest_GetAccessTokenWithRefreshToken = new(HttpMethod.Post, new Uri(endpointOpt.RefreshToken))
             {
@@ -216,14 +235,18 @@ namespace GuardianTalesGuildRaidUpdater.Services
             };
             HttpResponseMessage response_GetAccessTokenWithRefreshToken = await httpClient.SendAsync(httpRequest_GetAccessTokenWithRefreshToken);
 
-            if (!response_GetAccessTokenWithRefreshToken.IsSuccessStatusCode) return null;
+            if (!response_GetAccessTokenWithRefreshToken.IsSuccessStatusCode) return false;
 
             string res_string = await response_GetAccessTokenWithRefreshToken.Content.ReadAsStringAsync();
             ResGoogleOAuthTokenWithRefreshToken res_content = JsonConvert.DeserializeObject<ResGoogleOAuthTokenWithRefreshToken>(res_string)!;
 
-            if (!string.IsNullOrWhiteSpace(res_content.AccessToken)) return null;
+            authInfo.AccessToken = res_content.AccessToken;
+            authInfo.ExpiresIn = res_content.ExpiresIn;
+            authInfo.Scope = res_content.Scope;
+            authInfo.TokenType = res_content.TokenType;
+            authInfo.EndUpdate();
 
-            return res_content;
+            return true;
         }
     }
 }

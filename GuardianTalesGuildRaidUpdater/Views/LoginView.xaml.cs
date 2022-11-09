@@ -1,4 +1,6 @@
-﻿namespace GuardianTalesGuildRaidUpdater.Views
+﻿using GuardianTalesGuildRaidUpdater.Models.Messages;
+
+namespace GuardianTalesGuildRaidUpdater.Views
 {
     public partial class LoginView : UserControl
     {

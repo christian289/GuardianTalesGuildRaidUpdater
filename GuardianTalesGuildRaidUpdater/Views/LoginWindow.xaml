@@ -7,16 +7,17 @@
         xmlns:vm="clr-namespace:GuardianTalesGuildRaidUpdater.ViewModels"
         Width="1000"
         Height="550"
-        MouseDown="DragMove_MouseDown"
+        MouseDown="Window_MouseDown"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
-        mc:Ignorable="d">
+        mc:Ignorable="d"
+        Closed="Window_Closed">
     <d:Window.DataContext>
         <vm:LoginWindowViewModel />
     </d:Window.DataContext>
     <Window.Resources>
-        <selector:ViewModelLocator x:Key="ViewModelLocator" />
+        <!--<selector:ViewModelLocator x:Key="ViewModelLocator" />-->
     </Window.Resources>
     <ContentControl Content="{Binding LoginViewModel}" ContentTemplateSelector="{StaticResource ViewModelLocator}" />
 
