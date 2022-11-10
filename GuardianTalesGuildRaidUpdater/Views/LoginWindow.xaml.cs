@@ -17,7 +17,10 @@ namespace GuardianTalesGuildRaidUpdater.Views
 
         public void Receive(DialogResultMessage message)
         {
-            DialogResult = message.DialogResult;
+            if (message.WindowType == typeof(LoginWindow))
+            {
+                DialogResult = message.DialogResult;
+            }
         }
 
         private void Window_Closed(object sender, EventArgs e)

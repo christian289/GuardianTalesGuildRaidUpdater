@@ -120,7 +120,11 @@ namespace GuardianTalesGuildRaidUpdater
 
             if (result)
             {
-                MainWindow mainWindow = Container.GetRequiredService<MainWindow>(); // 왜 이걸 주석풀면 프로그램이 꺼지지?? 조사필요.
+                var mainVM = Container.GetRequiredService<MainViewModel>();
+                var mainWindowVM = Container.GetRequiredService<MainWindowViewModel>();
+                mainWindowVM.CurrentViewModel = mainVM;
+                MainWindow mainWindow = Container.GetRequiredService<MainWindow>();
+                mainWindow.DataContext = mainWindowVM;
                 mainWindow.Show();
                 mainWindow.Activate();
             }

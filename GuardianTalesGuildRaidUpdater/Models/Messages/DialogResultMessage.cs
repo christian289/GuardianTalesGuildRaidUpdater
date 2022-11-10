@@ -1,4 +1,4 @@
 ﻿namespace GuardianTalesGuildRaidUpdater.Models.Messages
 {
-    public record DialogResultMessage(bool DialogResult);
+    public record DialogResultMessage(Type WindowType, bool DialogResult);
 }

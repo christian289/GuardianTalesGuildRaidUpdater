@@ -5,6 +5,7 @@
              xmlns:local="clr-namespace:GuardianTalesGuildRaidUpdater"
              xmlns:selector="clr-namespace:GuardianTalesGuildRaidUpdater.DataTemplateSelectors"
              ShutdownMode="OnExplicitShutdown">
+    <!--  ShutdownMode를 OnExplicitShutdown으로 하면 명시적인 종료가 되기 때문에 모든 창을 직접 꺼야 APP이 종료된다.  -->
     <Application.Resources>
         <ResourceDictionary>
             <selector:ViewModelLocator x:Key="ViewModelLocator" />

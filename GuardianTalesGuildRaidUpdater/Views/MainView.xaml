@@ -1,12 +1,39 @@
 ﻿<UserControl x:Class="GuardianTalesGuildRaidUpdater.Views.MainView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:c1="http://schemas.componentone.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:GuardianTalesGuildRaidUpdater.Views"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
+    <StackPanel Orientation="Vertical">
+        <c1:C1Ribbon FontSize="11" SelectedIndex="0">
+            <c1:RibbonTabItem Header="메인화면">
+                <c1:RibbonGroup>
+                    <c1:C1ButtonTool Command="{Binding}"
+                                     IconSize="32"
+                                     Label="새로고침">
+                        <c1:C1ButtonTool.IconTemplate>
+                            <c1:C1IconTemplate>
+                                <c1:C1PathIcon Data="M458.369,80H430V0H2738V00h-60 354.138V490h215V300h60v190h215V354.138L458.369,80z M185,460H30v-90h155V460z M185,340H31.83l26.539-230H185V340z M185,80H90V30h95V80z M275,270h-60V170h60V270z M275,140h-60v-30 h60V140z M305,30h95v50h-95V30z M305,110h126.631l26.539,230 H305V110z M460,460H305v-90h155V460z" />
+                            </c1:C1IconTemplate>
+                        </c1:C1ButtonTool.IconTemplate>
+                    </c1:C1ButtonTool>
+                    s
+                    <c1:C1ButtonTool Command="{Binding}"
+                                     IconSize="32"
+                                     Label="업데이트">
+                        <c1:C1ButtonTool.IconTemplate>
+                            <c1:C1IconTemplate>
+                                <c1:C1BitmapIcon/>
+                            </c1:C1IconTemplate>
+                        </c1:C1ButtonTool.IconTemplate>
+                    </c1:C1ButtonTool>
+                </c1:RibbonGroup>
+            </c1:RibbonTabItem>
+        </c1:C1Ribbon>
+        <c1:FlexGrid />
+    </StackPanel>
 </UserControl>

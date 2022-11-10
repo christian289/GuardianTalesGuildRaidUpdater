@@ -2,6 +2,7 @@
 using GuardianTalesGuildRaidUpdater.Models.Messages;
 using GuardianTalesGuildRaidUpdater.Options;
 using GuardianTalesGuildRaidUpdater.Services;
+using GuardianTalesGuildRaidUpdater.Views;
 
 namespace GuardianTalesGuildRaidUpdater.ViewModels
 {
@@ -57,17 +58,17 @@ namespace GuardianTalesGuildRaidUpdater.ViewModels
             {
                 bool result = await authService.RefreshGoogleOAuthAsnyc();
 
-                WeakReferenceMessenger.Default.Send(new DialogResultMessage(result));
+                WeakReferenceMessenger.Default.Send(new DialogResultMessage(typeof(LoginWindow), result));
             }
             else if (string.IsNullOrWhiteSpace(Properties.Settings.Default.AccessToken))
             {
                 bool result = await authService.StartGoogleOAuthAsync();
 
-                WeakReferenceMessenger.Default.Send(new DialogResultMessage(result));
+                WeakReferenceMessenger.Default.Send(new DialogResultMessage(typeof(LoginWindow), result));
             }
             else // 유효한 엑세스 토큰이 존재함.
             {
-                WeakReferenceMessenger.Default.Send(new DialogResultMessage(true));
+                WeakReferenceMessenger.Default.Send(new DialogResultMessage(typeof(LoginWindow), true));
             }
         }
     }
